@@ -3,14 +3,6 @@ import axios from "axios";
 import TodoInput from "./TodoInput";
 import { ArrowClockwise } from "react-bootstrap-icons";
 
-const getTodo = () => {
-  const config = {
-    url: "http://localhost:3001/data",
-    method: "GET",
-  };
-  return axios(config);
-};
-
 const createTodo = (title) => {
   const payLoad = {
     title,
@@ -48,13 +40,22 @@ const deleteTodo = (id) => {
 const Todo = () => {
   const [todos, setTodos] = useState([]);
   const [isLoading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const getTodo = (page = 1, perPage = 2) => {
+    const config = {
+      url: `http://localhost:3001/data?_page=${page}&_limit=${perPage}`,
+      method: "GET",
+    };
+    return axios(config);
+  };
 
   useEffect(() => {
     handleGetTodo();
-  }, []);
+  }, [page]);
 
   const handleGetTodo = () => {
-    return getTodo()
+    return getTodo(page)
       .then((res) => {
         setTodos(res.data);
         setLoading(false);
@@ -105,6 +106,18 @@ const Todo = () => {
       <h1>TODOS</h1>
       <TodoInput submit={handleSubmit}></TodoInput>
       <br />
+      <div>
+        <button
+          onClick={() => {
+            if (page === 1) {
+              setPage(1);
+            } else setPage(page - 1);
+          }}
+        >
+          Prev
+        </button>
+        <button onClick={() => setPage(page + 1)}>Next</button>
+      </div>
       <div>
         {todos.map((item) => (
           <div
